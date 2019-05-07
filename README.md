@@ -1,2 +1,2 @@
-# ci-cr
-CI-CR command line interface - WIP
+# ContRes
+ContRes command line interface - WIP
