@@ -1,0 +1,28 @@
+image: continuumio/anaconda3
+
+variables:
+  PY: 1
+  OCT: 0
+  R: 0
+  FOR: 0
+  CPP: 0
+
+
+cache:
+  paths:
+    - pip-cache
+
+before_script:
+  - pip install -r requirements.txt
+
+analysis:
+  stage: deploy
+
+  script:
+    - python -m run.pre
+    - python -m run.main
+    - python -m run.post
+    - python -m run.contres
+  artifacts:
+    paths: 
+      - results/

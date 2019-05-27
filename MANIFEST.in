@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+include VERSION
+include requirements.txt
+include contres/template/*

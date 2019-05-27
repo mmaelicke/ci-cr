@@ -1,0 +1,66 @@
+#!/usr/bin python
+if __name__=='__main__':
+    import argparse
+
+    from contres.config import VERSION
+    from contres.cmd import empty, init_repository, manage_config
+    from contres.cmd import activate, deactivate, manage_git, git_init, git_push
+
+
+    # build the main Argument parser
+    parser = argparse.ArgumentParser(
+        description="Continuous Reseach integration CLI"
+    )
+    parser.add_argument("-v", "--version", action="store_true", help="Returns the CLI version")
+    parser.set_defaults(func=empty)
+
+    # add the sub-parsers
+    subparsers = parser.add_subparsers(title="Commands", description="Valid CLI commands", help="CLI command help")
+
+    # init parser
+    init_parser = subparsers.add_parser('init', help="Initialize a new repository")
+    init_parser.add_argument('-P', '--path', type=str, help="Path to repository, defaults to current working directory.")
+    init_parser.add_argument('-N', '--name', type=str, help="Name of the research project")
+    init_parser.add_argument('--main', type=str, help="Name of the main analysis file")
+    init_parser.add_argument('--pre', type=str, help="Optional: Name of a preprocessing script if any")
+    init_parser.add_argument('--post', type=str, help="Optional: Name of a postprocessing script if any")
+    init_parser.add_argument('--deactivate', action="store_true", help="Resulting repository will not upload CR metadata")
+    init_parser.add_argument('--no-gitlab', dest="no_gitlab", action="store_true", help="Supress creation of gitlab repository.")
+    init_parser.add_argument('--repo-url', dest="url", help="URL of your Gitlab installation and namespace to use.\nE.g.: https://gitlab.com/hydrocode")
+    init_parser.set_defaults(func=init_repository)
+
+    # config parser
+    confíg_parser = subparsers.add_parser('config', help="View or change configuration")
+    confíg_parser.set_defaults(func=manage_config)
+
+    # activaiton parsers
+    active_parser = subparsers.add_parser('activate', help="Activate current repository to upload meta data")
+    active_parser.add_argument('-P', '--path', type=str, help="Path of the research project. Defaults to CWD.")
+    active_parser.set_defaults(func=activate)
+    deactive_parser = subparsers.add_parser('deactivate', help="Deactivate current repository to supress meta data upload")
+    deactive_parser.add_argument('-P', '--path', type=str, help="Path of the research project. Defaults to CWD.")
+    deactive_parser.set_defaults(func=deactivate)
+
+    # upload parser
+    git_parser = subparsers.add_parser('git', help="Upload the repository to a Gitlab instance.")
+    git_parser.set_defaults(func=manage_git)
+    git_subparsers = git_parser.add_subparsers(title="Git commands", description="Thin wrapper for managing the git repo", help="Git CLI command help")
+    # git init
+    git_init_parser = git_subparsers.add_parser('init', help="Initialize the contained git repository. Prerequisite to upload.")
+    git_init_parser.add_argument('-P', '--path', type=str, help="Path of the research project. Defaults to CWD.")
+    git_init_parser.add_argument('--url', type=str, help="Full URL to the gitlab repositry. It has to exist and be emptry.")
+    git_init_parser.set_defaults(func=git_init)
+    # git push
+    git_push_parser = git_subparsers.add_parser('upload', help="Upload the repository to a Gitlab instance")
+    git_push_parser.add_argument('-P', '--path', type=str, help="Path of the research project. Defaults to CWD.")
+    git_push_parser.add_argument('-F', '--files', type=str, dest='add', nargs='+', help="List of files to be added. Defaults to 'all' for all files.")
+    git_push_parser.add_argument('-m', '--message', help="Customize the commit message.")
+    git_push_parser.set_defaults(func=git_push)
+    
+
+    # parse the arguments
+    args = parser.parse_args()
+    if args.version:
+        print(VERSION)
+    else:
+        args.func(args)
